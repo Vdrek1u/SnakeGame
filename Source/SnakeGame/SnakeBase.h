@@ -6,21 +6,52 @@
 #include "GameFramework/Actor.h"
 #include "SnakeBase.generated.h"
 
+class ASnakeElementBase;
+
+UENUM()
+enum class EMovementDirection
+{
+	UP,
+	DOWN,
+	Left,
+	RIGHT
+};
+
+
 UCLASS()
 class SNAKEGAME_API ASnakeBase : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ASnakeBase();
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<ASnakeElementBase> SnakeElementClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	float ElementSize;
+
+	UPROPERTY(EditDefaultsOnly)
+	float MovementSpeed;
+
+	UPROPERTY()
+	TArray<ASnakeElementBase*> SnakeElements;
+
+	UPROPERTY()
+	EMovementDirection LastMoveDirection;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void AddSnakeElement(int ElementsNum = 1);
+
+	void Move();
 
 };
