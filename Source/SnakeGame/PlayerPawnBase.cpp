@@ -66,13 +66,13 @@ void APlayerPawnBase::HandlePlayerHorizontalInput(float value)
 {
 	if (IsValid(SnakeActor))
 	{
-		if (value > 0 && SnakeActor->LastMoveDirection != EMovementDirection::Left)
+		if (value > 0 && SnakeActor->LastMoveDirection != EMovementDirection::LEFT)
 		{
 			SnakeActor->LastMoveDirection = EMovementDirection::RIGHT;
 		}
 		else if (value < 0 && SnakeActor->LastMoveDirection != EMovementDirection::RIGHT)
 		{
-			SnakeActor->LastMoveDirection = EMovementDirection::Left;
+			SnakeActor->LastMoveDirection = EMovementDirection::LEFT;
 		}
 	}
 }

@@ -13,7 +13,7 @@ enum class EMovementDirection
 {
 	UP,
 	DOWN,
-	Left,
+	LEFT,
 	RIGHT
 };
 
@@ -50,8 +50,11 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
 	void AddSnakeElement(int ElementsNum = 1);
-
+	UFUNCTION()
 	void Move();
+	UFUNCTION()
+	void SnakeElementOverlap(ASnakeElementBase* OverlappedElement, AActor* Other);
 
 };
