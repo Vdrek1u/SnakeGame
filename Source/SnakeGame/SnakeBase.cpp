@@ -15,7 +15,8 @@ ASnakeBase::ASnakeBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	ElementSize = 100.f;
-	MovementSpeed = 10.f;
+	MovementSpeed = 0.5f;
+	SpeedBonus = 0.5f;
 	LastMoveDirection = EMovementDirection::DOWN;
 	bHasDirectionChanged = false;
 
@@ -32,7 +33,7 @@ void ASnakeBase::BeginPlay()
 	Super::BeginPlay();
 	SetActorTickInterval(MovementSpeed);
 	AddSnakeElement(1);
-	GetWorld()->GetTimerManager().SetTimer(SpawnFoodTimerHandle, this, &ASnakeBase::SpawnFood, 10.0f, true, 5.0f);
+	GetWorld()->GetTimerManager().SetTimer(SpawnFoodTimerHandle, this, &ASnakeBase::SpawnFood, 4.0f, true, 5.0f);
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("GridManagerInstance"), FoundActors);
 
@@ -186,5 +187,13 @@ void ASnakeBase::SpawnFood()
 	if (GridManager)
 	{
 		GridManager->SpawnObjectAtRandomLocation(BP_Food_Class);
+	}
+}
+
+void ASnakeBase::SpeedUp()
+{
+	if (SpeedBonus > 0.2)
+	{
+		SetActorTickInterval(SpeedBonus -= 0.02);
 	}
 }

@@ -37,6 +37,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	float MovementSpeed;
 
+	UPROPERTY(EditDefaultsOnly)
+	float SpeedBonus;
+
 	UPROPERTY()
 	TArray<ASnakeElementBase*> SnakeElements;
 
@@ -47,9 +50,9 @@ public:
 	bool bHasDirectionChanged = false;
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AGridManager> GridManagerClass;
+	AGridManager* GridManager;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> BP_Food_Class;
 	UPROPERTY()
 	FTimerHandle SpawnFoodTimerHandle;
@@ -72,4 +75,6 @@ public:
 	void ChangeDirection(EMovementDirection NewDirection);
 	UFUNCTION()
 	void SpawnFood();
+	UFUNCTION()
+	void SpeedUp();
 };
