@@ -54,6 +54,10 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> BP_Food_Class;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Bonus")
+	TSubclassOf<AActor> BP_SlowDown_Class;
+
 	UPROPERTY()
 	FTimerHandle SpawnFoodTimerHandle;
 
@@ -76,5 +80,11 @@ public:
 	UFUNCTION()
 	void SpawnFood();
 	UFUNCTION()
+	void SpawnSlowDownBonus();
+	UFUNCTION()
 	void SpeedUp();
+	UFUNCTION()
+	void SpeedDown();
+	UFUNCTION()
+	int32 GetSnakeLength() const { return SnakeElements.Num(); }
 };

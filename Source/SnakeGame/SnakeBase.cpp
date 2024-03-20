@@ -25,6 +25,12 @@ ASnakeBase::ASnakeBase()
 	{
 		BP_Food_Class = FoodBP.Class;
 	}
+
+	static ConstructorHelpers::FClassFinder<AActor> SlowDownBonusBP(TEXT("/Game/InteractOBJ/SlowDownBonusBP"));
+	if (SlowDownBonusBP.Succeeded())
+	{
+		BP_SlowDown_Class = SlowDownBonusBP.Class;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -190,10 +196,31 @@ void ASnakeBase::SpawnFood()
 	}
 }
 
+void ASnakeBase::SpawnSlowDownBonus()
+{
+	if (GridManager)
+	{
+		GridManager->SpawnObjectAtRandomLocation(BP_SlowDown_Class);
+	}
+}
+
 void ASnakeBase::SpeedUp()
 {
 	if (SpeedBonus > 0.2)
 	{
 		SetActorTickInterval(SpeedBonus -= 0.02);
+	}
+}
+
+void ASnakeBase::SpeedDown()
+{
+	if (SpeedBonus < 0.4)
+	{
+		SetActorTickInterval(SpeedBonus = 0.4);
+	}
+
+	else
+	{
+		SetActorTickInterval(SpeedBonus = 0.5);
 	}
 }
