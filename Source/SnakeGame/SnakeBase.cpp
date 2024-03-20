@@ -3,7 +3,11 @@
 
 #include "SnakeBase.h"
 #include "SnakeElementBase.h"
+#include "Food.h"
+#include "GridManager.h"
 #include "Interactable.h"
+#include "EngineUtils.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASnakeBase::ASnakeBase()
@@ -13,6 +17,13 @@ ASnakeBase::ASnakeBase()
 	ElementSize = 100.f;
 	MovementSpeed = 10.f;
 	LastMoveDirection = EMovementDirection::DOWN;
+	bHasDirectionChanged = false;
+
+	static ConstructorHelpers::FClassFinder<AActor> FoodBP(TEXT("/Game/InteractOBJ/FoodBP"));
+	if (FoodBP.Succeeded())
+	{
+		BP_Food_Class = FoodBP.Class;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -20,22 +31,95 @@ void ASnakeBase::BeginPlay()
 {
 	Super::BeginPlay();
 	SetActorTickInterval(MovementSpeed);
-	AddSnakeElement(5);
+	AddSnakeElement(1);
+	GetWorld()->GetTimerManager().SetTimer(SpawnFoodTimerHandle, this, &ASnakeBase::SpawnFood, 10.0f, true, 5.0f);
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("GridManagerInstance"), FoundActors);
+
+	if (FoundActors.Num() > 0)
+	{
+		AGridManager* FoundGridManager = Cast<AGridManager>(FoundActors[0]);
+		if (FoundGridManager)
+		{
+			GridManager = FoundGridManager;
+			GridManager->GenerateGrid();
+			for (int i = 0; i < 5; ++i)
+			{
+				SpawnFood();
+			}
+		}
+	}
 }
 
 // Called every frame
 void ASnakeBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	bHasDirectionChanged = false;
 	Move();
+}
+
+void ASnakeBase::ChangeDirection(EMovementDirection NewDirection)
+{
+	if (!bHasDirectionChanged)
+	{
+		if ((NewDirection == EMovementDirection::UP && LastMoveDirection != EMovementDirection::DOWN) ||
+			(NewDirection == EMovementDirection::DOWN && LastMoveDirection != EMovementDirection::UP) ||
+			(NewDirection == EMovementDirection::LEFT && LastMoveDirection != EMovementDirection::RIGHT) ||
+			(NewDirection == EMovementDirection::RIGHT && LastMoveDirection != EMovementDirection::LEFT))
+		{
+			LastMoveDirection = NewDirection;
+			bHasDirectionChanged = true;
+		}
+	}
 }
 
 void ASnakeBase::AddSnakeElement(int ElementsNum)
 {
-	for (int i = 1; i < ElementsNum; ++i)
+	FVector NewLocation = FVector::ZeroVector;
+
+	if (SnakeElements.Num() > 0)
+	{
+		ASnakeElementBase* LastElement = SnakeElements.Last();
+		FVector LastElementLocation = LastElement->GetActorLocation();
+
+		switch (LastMoveDirection)
+		{
+		case EMovementDirection::UP:
+			NewLocation = LastElementLocation + FVector(-ElementSize, 0, 0);
+			break;
+		case EMovementDirection::DOWN:
+			NewLocation = LastElementLocation + FVector(ElementSize, 0, 0);
+			break;
+		case EMovementDirection::LEFT:
+			NewLocation = LastElementLocation + FVector(0, -ElementSize, 0);
+			break;
+		case EMovementDirection::RIGHT:
+			NewLocation = LastElementLocation + FVector(0, ElementSize, 0);
+			break;
+		}
+	}
+
+	for (int i = 0; i < ElementsNum; ++i)
+	{
+		FTransform NewTransform(NewLocation);
+		ASnakeElementBase* NewSnakeElement = GetWorld()->SpawnActor<ASnakeElementBase>(SnakeElementClass, NewTransform);
+		
+			NewSnakeElement->SnakeOwner = this;
+			SnakeElements.Add(NewSnakeElement);
+
+			if (i == 0 && SnakeElements.Num() == 1)
+			{
+				NewSnakeElement->SetFirstElementType();
+			}
+	}
+
+	/*for (int i = 0; i < ElementsNum; ++i)
 	{
 		FVector NewLocation(SnakeElements.Num() * ElementSize, 0, 0);
 		FTransform NewTransform(NewLocation);
+
 		ASnakeElementBase* NewSnakeElement = GetWorld()->SpawnActor<ASnakeElementBase>(SnakeElementClass, NewTransform);
 		NewSnakeElement->SnakeOwner = this;
 		int32 ElementIndex = SnakeElements.Add(NewSnakeElement);
@@ -43,7 +127,7 @@ void ASnakeBase::AddSnakeElement(int ElementsNum)
 		{
 			NewSnakeElement->SetFirstElementType();
 		}
-	}
+	}*/
 }
 
 void ASnakeBase::Move()
@@ -68,6 +152,7 @@ void ASnakeBase::Move()
 	}
 
 	//AddActorWorldOffset(MovementVector);
+	SnakeElements[0]->ToggleCollision();
 
 	for (int i = SnakeElements.Num() - 1; i > 0; i--)
 	{
@@ -78,6 +163,7 @@ void ASnakeBase::Move()
 	}
 
 	SnakeElements[0]->AddActorWorldOffset(MovementVector);
+	SnakeElements[0]->ToggleCollision();
 }
 
 void ASnakeBase::SnakeElementOverlap(ASnakeElementBase* OverlappedElement, AActor* Other)
@@ -87,8 +173,18 @@ void ASnakeBase::SnakeElementOverlap(ASnakeElementBase* OverlappedElement, AActo
 		int32 ElemIndex;
 		SnakeElements.Find(OverlappedElement, ElemIndex);
 		bool bIsFirst = ElemIndex == 0;
-		IInteractable* IInteractableInterface = Cast<IInteractable>(Other);
+		IInteractable* InteractableInterface = Cast<IInteractable>(Other);
+		if (InteractableInterface)
+		{
+			InteractableInterface->Interact(this, bIsFirst);
+		}
 	}
 }
 
-	
+void ASnakeBase::SpawnFood()
+{
+	if (GridManager)
+	{
+		GridManager->SpawnObjectAtRandomLocation(BP_Food_Class);
+	}
+}

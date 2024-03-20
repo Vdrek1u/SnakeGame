@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "Interactable.generated.h"
+#include "GridSpawn.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UInteractable : public UInterface
+class UGridSpawn : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,12 +16,12 @@ class UInteractable : public UInterface
 /**
  * 
  */
-class SNAKEGAME_API IInteractable
+class SNAKEGAME_API IGridSpawn
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void Interact(AActor* Interactor, bool bIsHead);
+	virtual void SpawnAtGridLocation(const FVector& Location) = 0;
 };

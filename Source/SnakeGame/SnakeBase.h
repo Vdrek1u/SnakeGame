@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GridManager.h"
 #include "SnakeBase.generated.h"
 
 class ASnakeElementBase;
@@ -42,6 +43,17 @@ public:
 	UPROPERTY()
 	EMovementDirection LastMoveDirection;
 
+	UPROPERTY()
+	bool bHasDirectionChanged = false;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AGridManager> GridManagerClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AActor> BP_Food_Class;
+	UPROPERTY()
+	FTimerHandle SpawnFoodTimerHandle;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -56,5 +68,8 @@ public:
 	void Move();
 	UFUNCTION()
 	void SnakeElementOverlap(ASnakeElementBase* OverlappedElement, AActor* Other);
-
+	UFUNCTION()
+	void ChangeDirection(EMovementDirection NewDirection);
+	UFUNCTION()
+	void SpawnFood();
 };
