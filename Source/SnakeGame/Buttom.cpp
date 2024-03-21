@@ -38,12 +38,12 @@ void AButtom::Interact(AActor* Interactor, bool bIsHead)
 		auto Snake = Cast<ASnakeBase>(Interactor);
 		if (IsValid(Snake) && Snake->GetSnakeLength() >= 15) //идея переделать в "пока элемент на кнопке"
 		{
-			ButtomActiveted();
+            ActivateButtom();
 		}
 	}
 }
 
-void AButtom::ButtomActiveted()
+void AButtom::ActivateButtom()
 {
     if (!MeshComponent) return;
 

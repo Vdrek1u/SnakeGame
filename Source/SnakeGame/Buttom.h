@@ -43,6 +43,6 @@ public:
 
 	virtual void Interact(AActor* Interactor, bool bIsHead) override;
 
-	void ButtomActiveted();
+	void ActivateButtom();
 
 };
