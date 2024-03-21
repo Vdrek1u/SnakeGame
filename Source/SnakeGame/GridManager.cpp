@@ -4,6 +4,7 @@
 #include "GridManager.h"
 #include "Components/BoxComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Interactable.h"
 
 // Sets default values
 AGridManager::AGridManager()
@@ -51,35 +52,26 @@ void AGridManager::GenerateGrid()
 
 bool AGridManager::IsCellOccupied(const FVector& Location) const
 {
-    FVector BoxExtent = FVector(SizeOfCell / 2.0f, SizeOfCell / 2.0f, SizeOfCell * 2.0f);
+    FVector BoxExtent = FVector(SizeOfCell / 2.0f, SizeOfCell / 2.0f, SizeOfCell / 2.0f);
     FCollisionShape CollisionShape = FCollisionShape::MakeBox(BoxExtent);
 
-    // Настройка параметров запроса
+    TArray<FOverlapResult> Overlaps;
     FCollisionQueryParams QueryParams;
     QueryParams.bReturnPhysicalMaterial = false;
-    QueryParams.AddIgnoredActor(this); 
+    QueryParams.AddIgnoredActor(this);
 
-    // Визуализация проверки
-    DrawDebugBox(GetWorld(), Location, BoxExtent, FColor::Red, false, 5.0f);
+    bool bOverlapFound = GetWorld()->OverlapMultiByChannel(Overlaps, Location, FQuat::Identity, ECC_GameTraceChannel1, CollisionShape, QueryParams);
 
-    // Выполнение проверки пересечения
-    bool bIsOccupiedS = GetWorld()->OverlapBlockingTestByChannel(
-        Location,
-        FQuat::Identity,
-        ECC_WorldStatic,
-        CollisionShape,
-        QueryParams
-    );
-    bool bIsOccupiedD = GetWorld()->OverlapBlockingTestByChannel(
-        Location,
-        FQuat::Identity,
-        ECC_WorldDynamic,
-        CollisionShape,
-        QueryParams
-    );
+    for (const FOverlapResult& Result : Overlaps)
+    {
+        AActor* OverlappedActor = Result.GetActor();
+        if (OverlappedActor && OverlappedActor->Implements<UInteractable>())
+        {
+            return true; // Найден актор, реализующий интерфейс IInteractable
+        }
+    }
 
-   
-    return bIsOccupiedS || bIsOccupiedD;
+    return false; // Клетка не занята
 }
 
 bool AGridManager::SpawnObjectAtRandomLocation(TSubclassOf<AActor> ObjectToSpawn)
