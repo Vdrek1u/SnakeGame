@@ -67,7 +67,7 @@ bool AGridManager::IsCellOccupied(const FVector& Location) const
         AActor* OverlappedActor = Result.GetActor();
         if (OverlappedActor && OverlappedActor->Implements<UInteractable>())
         {
-            return true; // Найден актор, реализующий интерфейс IInteractable
+            return true; // Найден актор, реализующий IInteractable
         }
     }
 

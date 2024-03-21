@@ -14,10 +14,10 @@ ASnakeBase::ASnakeBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
 	ElementSize = 100.f;
 	MovementSpeed = 0.5f;
 	SpeedBonus = 0.5f;
-	LastMoveDirection = EMovementDirection::DOWN;
 	bHasDirectionChanged = false;
 
 	static ConstructorHelpers::FClassFinder<AActor> FoodBP(TEXT("/Game/InteractOBJ/FoodBP"));
@@ -39,7 +39,7 @@ void ASnakeBase::BeginPlay()
 	Super::BeginPlay();
 	SetActorTickInterval(MovementSpeed);
 	AddSnakeElement(1);
-	GetWorld()->GetTimerManager().SetTimer(SpawnFoodTimerHandle, this, &ASnakeBase::SpawnFood, 0.1f, true, 1.0f);
+	GetWorld()->GetTimerManager().SetTimer(SpawnFoodTimerHandle, this, &ASnakeBase::SpawnFood, 4.0f, true, 5.0f);
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("GridManagerInstance"), FoundActors);
 
@@ -205,8 +205,6 @@ void ASnakeBase::SnakeElementOverlap(ASnakeElementBase* OverlappedElement, AActo
 		{
 			FString Message = FString::Printf(TEXT("Overlap with %s"), *Other->GetName());
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, Message);
-
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *Message);
 		}
 	}
 }
