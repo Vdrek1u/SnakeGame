@@ -39,7 +39,7 @@ void ASnakeBase::BeginPlay()
 	Super::BeginPlay();
 	SetActorTickInterval(MovementSpeed);
 	AddSnakeElement(1);
-	GetWorld()->GetTimerManager().SetTimer(SpawnFoodTimerHandle, this, &ASnakeBase::SpawnFood, 4.0f, true, 5.0f);
+	GetWorld()->GetTimerManager().SetTimer(SpawnFoodTimerHandle, this, &ASnakeBase::SpawnFood, 0.1f, true, 1.0f);
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("GridManagerInstance"), FoundActors);
 
@@ -63,13 +63,26 @@ void ASnakeBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	bHasDirectionChanged = false;
-	Move();
+	if (!bIsWaitingForInput)
+	{
+		bHasDirectionChanged = false;
+		Move();
+	}
 }
 
 void ASnakeBase::ChangeDirection(EMovementDirection NewDirection)
 {
-	if (!bHasDirectionChanged)
+	if (bIsWaitingForInput)
+	{
+		if (NewDirection != LastMoveDirection)
+		{
+			bIsWaitingForInput = false;
+			LastMoveDirection = NewDirection;
+			bHasDirectionChanged = true;
+		}
+	}
+	
+	else if (!bHasDirectionChanged)
 	{
 		if ((NewDirection == EMovementDirection::UP && LastMoveDirection != EMovementDirection::DOWN) ||
 			(NewDirection == EMovementDirection::DOWN && LastMoveDirection != EMovementDirection::UP) ||
@@ -184,6 +197,16 @@ void ASnakeBase::SnakeElementOverlap(ASnakeElementBase* OverlappedElement, AActo
 		if (InteractableInterface)
 		{
 			InteractableInterface->Interact(this, bIsFirst);
+		}
+	}
+	if (Other && Other != this)
+	{
+		if (Other)
+		{
+			FString Message = FString::Printf(TEXT("Overlap with %s"), *Other->GetName());
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, Message);
+
+			UE_LOG(LogTemp, Warning, TEXT("%s"), *Message);
 		}
 	}
 }

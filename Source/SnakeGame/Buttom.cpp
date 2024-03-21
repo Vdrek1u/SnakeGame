@@ -36,7 +36,7 @@ void AButtom::Interact(AActor* Interactor, bool bIsHead)
 	if (bIsHead)
 	{
 		auto Snake = Cast<ASnakeBase>(Interactor);
-		if (IsValid(Snake) && Snake->GetSnakeLength() >= 5)
+		if (IsValid(Snake) && Snake->GetSnakeLength() >= 15) //переделать в "пока элемент на кнопке"
 		{
 			ButtomActiveted();
 		}
@@ -45,16 +45,30 @@ void AButtom::Interact(AActor* Interactor, bool bIsHead)
 
 void AButtom::ButtomActiveted()
 {
-	if (!MeshComponent) return;
+    if (!MeshComponent) return;
 
-	if (!DynamicMaterialInstance)
-	{
-		DynamicMaterialInstance = MeshComponent->CreateDynamicMaterialInstance(0);
-	}
+    if (!bIsButtomActivated)
+    {
+        if (!DynamicMaterialInstance)
+        {
+            DynamicMaterialInstance = MeshComponent->CreateDynamicMaterialInstance(0);
+        }
 
-	if (DynamicMaterialInstance)
-	{
-		FLinearColor NewColor = FLinearColor::Red;
-		DynamicMaterialInstance->SetVectorParameterValue(FName("DynamicColor"), NewColor);
-	}
+        if (DynamicMaterialInstance)
+        {
+            FLinearColor NewColor = FLinearColor::Red;
+            DynamicMaterialInstance->SetVectorParameterValue(FName("DynamicColor"), NewColor);
+
+            if (DoorPart1 && DoorPart2)
+            {
+                FVector NewLocation1 = DoorPart1->GetActorLocation() + FVector(0, MoveDistance, 0);
+                FVector NewLocation2 = DoorPart2->GetActorLocation() - FVector(0, MoveDistance, 0);
+
+                DoorPart1->SetActorLocation(NewLocation1, true);
+                DoorPart2->SetActorLocation(NewLocation2, true);
+            }
+
+            bIsButtomActivated = true;
+        }
+    }
 }

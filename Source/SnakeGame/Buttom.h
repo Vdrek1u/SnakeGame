@@ -20,6 +20,18 @@ public:
 	UStaticMeshComponent* MeshComponent;
 	UMaterialInstanceDynamic* DynamicMaterialInstance = nullptr;
 
+	UPROPERTY()
+	bool bIsButtomActivated = false;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	AActor* DoorPart1;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	AActor* DoorPart2;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	float MoveDistance = 120.0f;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

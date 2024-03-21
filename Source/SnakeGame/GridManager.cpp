@@ -51,13 +51,16 @@ void AGridManager::GenerateGrid()
 
 bool AGridManager::IsCellOccupied(const FVector& Location) const
 {
-    FVector BoxExtent = FVector(SizeOfCell / 2.0f, SizeOfCell / 2.0f, SizeOfCell / 2.0f);
+    FVector BoxExtent = FVector(SizeOfCell / 2.0f, SizeOfCell / 2.0f, SizeOfCell * 2.0f);
     FCollisionShape CollisionShape = FCollisionShape::MakeBox(BoxExtent);
 
     // Настройка параметров запроса
     FCollisionQueryParams QueryParams;
     QueryParams.bReturnPhysicalMaterial = false;
     QueryParams.AddIgnoredActor(this); 
+
+    // Визуализация проверки
+    DrawDebugBox(GetWorld(), Location, BoxExtent, FColor::Red, false, 5.0f);
 
     // Выполнение проверки пересечения
     bool bIsOccupiedS = GetWorld()->OverlapBlockingTestByChannel(
@@ -75,6 +78,7 @@ bool AGridManager::IsCellOccupied(const FVector& Location) const
         QueryParams
     );
 
+   
     return bIsOccupiedS || bIsOccupiedD;
 }
 
@@ -82,7 +86,7 @@ bool AGridManager::SpawnObjectAtRandomLocation(TSubclassOf<AActor> ObjectToSpawn
 {
     if (!GetWorld()) return false;
 
-    for (int32 Try = 0; Try < 100; ++Try)
+    for (int32 Try = 0; Try < 15; ++Try)
     {
         int32 RandomIndex = FMath::RandRange(0, GridPoints.Num() - 1);
         FVector SpawnLocation = GridPoints[RandomIndex];
@@ -94,18 +98,32 @@ bool AGridManager::SpawnObjectAtRandomLocation(TSubclassOf<AActor> ObjectToSpawn
             if (Spawnable)
             {
                 Spawnable->SpawnAtGridLocation(SpawnLocation);
+                if (GEngine)
+                {
+                    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Spawn at %s"), *SpawnLocation.ToString()));
+                }
                return true;
             }
             else if (SpawnedActor)
             {
                 SpawnedActor->Destroy();
+                if (GEngine)
+                {
+                    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Spawnable odject haven't interf %s"), *SpawnLocation.ToString()));
+                }
+            }
+        }
+        else
+        {
+            if (GEngine)
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("SpawnPoint is occupated %s"), *SpawnLocation.ToString()));
             }
         }
     }
-
+    if (GEngine)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Spawn failed after 15 try"));
+    }
     return false;
-
-
 }
-
-
