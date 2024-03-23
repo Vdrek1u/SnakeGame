@@ -40,6 +40,8 @@ void APlayerPawnBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 	PlayerInputComponent->BindAxis("Vertical", this, &APlayerPawnBase::HandlePlayerVerticalInput);
 	PlayerInputComponent->BindAxis("Horizontal", this, &APlayerPawnBase::HandlePlayerHorizontalInput);
+
+    PlayerInputComponent->BindAction("Quit", IE_Pressed, this, &APlayerPawnBase::QuitGame);
 }
 
 void APlayerPawnBase::CreateSnakeActor()
@@ -74,5 +76,14 @@ void APlayerPawnBase::HandlePlayerHorizontalInput(float value)
         {
             SnakeActor->ChangeDirection(EMovementDirection::LEFT);
         }
+    }
+}
+
+void APlayerPawnBase::QuitGame()
+{
+    UWorld* World = GetWorld();
+    if (World != nullptr)
+    {
+        FGenericPlatformMisc::RequestExit(false);
     }
 }

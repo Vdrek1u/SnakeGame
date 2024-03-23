@@ -46,5 +46,8 @@ public:
 	UFUNCTION()
 	void HandlePlayerHorizontalInput(float value);
 
+	UFUNCTION()
+	void QuitGame();
+
 };
 
